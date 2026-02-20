@@ -1,0 +1,767 @@
+{
+  "name": "Citylar - Tool de Edição",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "citylar/upload",
+        "responseMode": "responseNode",
+        "options": {
+          "binaryPropertyName": "file"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -144,
+        672
+      ],
+      "id": "43175e72-5954-4677-a9c3-5bfe482c2ff2",
+      "name": "Webhook",
+      "webhookId": "1f7071df-5df0-4688-8f24-300b106470cc"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "file0",
+        "options": {
+          "delimiter": ";",
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        80,
+        672
+      ],
+      "id": "fb023d43-bee6-41c9-8ce6-9743262bbf01",
+      "name": "Extract from File",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6d73e1f0-9b5e-48b4-a666-77ee27e295d6",
+              "name": "Periodo",
+              "value": "={{ \n  \"20\" + $json.Data.split(\"/\")[2] + \"-\" + $json.Data.split(\"/\")[1] \n}}",
+              "type": "string"
+            },
+            {
+              "id": "27b61c45-d195-4f18-93b5-2156a79dc511",
+              "name": "Key",
+              "value": "={{$json[\"﻿Key\"] || $json.Key}}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        304,
+        576
+      ],
+      "id": "3c10d20a-3fc0-4dfd-b2be-5f06ed2b85f1",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8",
+          "mode": "list",
+          "cachedResultName": "Resultado",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 496278067,
+          "mode": "list",
+          "cachedResultName": "Colaborador",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8/edit#gid=496278067"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Key",
+              "lookupValue": "={{ $json.Key }}"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -144,
+        -32
+      ],
+      "id": "ef869fbc-69a2-443c-83d4-1dbb8ca77242",
+      "name": "Valida colaborador",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleApi": {
+          "id": "bGIuFFGoplKkY5UG",
+          "name": "Google Service Account account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8",
+          "mode": "list",
+          "cachedResultName": "Resultado",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 223811818,
+          "mode": "list",
+          "cachedResultName": "iaresultado",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8/edit#gid=223811818"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Key",
+              "lookupValue": "={{$json.Key}}"
+            },
+            {
+              "lookupColumn": "Periodo",
+              "lookupValue": "={{$json.Periodo}}"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1200,
+        480
+      ],
+      "id": "05070de1-5b69-4119-a3f4-f9ad25389516",
+      "name": "Verifica o período",
+      "credentials": {
+        "googleApi": {
+          "id": "bGIuFFGoplKkY5UG",
+          "name": "Google Service Account account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8",
+          "mode": "list",
+          "cachedResultName": "Resultado",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 223811818,
+          "mode": "list",
+          "cachedResultName": "iaresultado",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8/edit#gid=223811818"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Key": "{{$json.Key}}",
+            "Periodo": "{{$json.Periodo}}",
+            "Ticket Médio": "{{$json[\"Ticket Médio\"]}}",
+            "Data": "{{$json.Data}}"
+          },
+          "matchingColumns": [
+            "Key"
+          ],
+          "schema": [
+            {
+              "id": "Key",
+              "displayName": "Key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Periodo",
+              "displayName": "Periodo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nome",
+              "displayName": "Nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Ticket Médio",
+              "displayName": "Ticket Médio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1648,
+        288
+      ],
+      "id": "8691892e-63bf-4220-bc1b-ff55b3d5ba31",
+      "name": "Atualiza Ticket",
+      "credentials": {
+        "googleApi": {
+          "id": "bGIuFFGoplKkY5UG",
+          "name": "Google Service Account account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8",
+          "mode": "list",
+          "cachedResultName": "Resultado",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 223811818,
+          "mode": "list",
+          "cachedResultName": "iaresultado",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8/edit#gid=223811818"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Key": "{{$json.Key}}",
+            "Nome": "{{$json.Nome}}",
+            "Data": "{{$json.Data}}",
+            "Periodo": "{{$json.Periodo}}",
+            "Ticket Médio": "{{$json[\"Ticket Médio\"]}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Key",
+              "displayName": "Key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Periodo",
+              "displayName": "Periodo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nome",
+              "displayName": "Nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ticket Médio",
+              "displayName": "Ticket Médio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1648,
+        528
+      ],
+      "id": "ae283c4a-4c54-436c-8668-7aa7c8725c03",
+      "name": "Cria Nova Linha",
+      "credentials": {
+        "googleApi": {
+          "id": "bGIuFFGoplKkY5UG",
+          "name": "Google Service Account account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"ok\",\n  \"colaborador\": \"={{$json.Nome}}\",\n  \"periodo\": \"={{$json.Periodo}}\",\n  \"ticket_medio\": \"R$ {{$json['Ticket Médio']}}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1872,
+        192
+      ],
+      "id": "d64def71-a3a6-4a08-b962-c41e29d86668",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"erro\",\n  \"etapa\": \"Extract from File\",\n  \"message\": \"Erro ao processar o arquivo enviado.\",\n  \"detalhe\": \"={{$json.error?.message || 'Verifique o formato da planilha (CSV com ; e header).'}}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        304,
+        768
+      ],
+      "id": "5847ccf5-a337-4724-92de-e7e661506c1e",
+      "name": "Erro: Extract from File"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"erro\",\n  \"etapa\": \"Valida colaborador\",\n  \"message\": \"Erro técnico ao consultar a planilha Colaborador.\",\n  \"detalhe\": \"={{$json.error?.message || 'Falha na comunicação com Google Sheets.'}}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1200,
+        672
+      ],
+      "id": "9e48d24a-fcc4-4e86-9f8d-4e938bfa678e",
+      "name": "Erro: Valida colaborador"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"erro\",\n  \"etapa\": \"Verificação de registro\",\n  \"key\": \"={{$json.Key || $json['﻿Key'] || ''}}\",\n  \"periodo\": \"={{$json.Periodo || ''}}\",\n  \"message\": \"Não foi possível verificar a existência do registro para este colaborador no período informado.\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -144,
+        -256
+      ],
+      "id": "f2617bcc-db22-4b38-86f8-d286e6fc9063",
+      "name": "Erro: Se existe o registro"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"erro\",\n  \"etapa\": \"Verifica no período\",\n  \"key\": \"={{$json.Key}}\",\n  \"periodo\": \"={{$json.Periodo}}\",\n  \"message\": \"Erro ao verificar registro existente no período.\",\n  \"detalhe\": \"={{$json.error?.message}}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1424,
+        576
+      ],
+      "id": "1065d650-2f4b-46fe-8799-e6ffed194096",
+      "name": "Erro: Se verifica o período"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"erro\",\n  \"etapa\": \"Cria Nova Linha\",\n  \"key\": \"={{$json.Key}}\",\n  \"periodo\": \"={{$json.Periodo}}\",\n  \"message\": \"Falha ao inserir nova linha.\",\n  \"detalhe\": \"={{$json.error?.message}}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1872,
+        576
+      ],
+      "id": "ce1a70e8-019e-4b96-9319-cfc17d12d381",
+      "name": "Erro: Cria nova linha"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"erro\",\n  \"etapa\": \"Atualiza Ticket\",\n  \"key\": \"={{$json.Key}}\",\n  \"periodo\": \"={{$json.Periodo}}\",\n  \"message\": \"Falha ao atualizar registro.\",\n  \"detalhe\": \"={{$json.error?.message}}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1872,
+        384
+      ],
+      "id": "b7ab7cf3-5d2b-4fff-aa34-3ae6a46b64db",
+      "name": "Erro: Atualiza ticket"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8",
+          "mode": "list",
+          "cachedResultName": "Resultado",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 496278067,
+          "mode": "list",
+          "cachedResultName": "Colaborador",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8/edit#gid=496278067"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        528,
+        576
+      ],
+      "id": "430e73ec-69dd-47d1-975e-6bd3b62ece0a",
+      "name": "Lista Colaboradores",
+      "executeOnce": true,
+      "credentials": {
+        "googleApi": {
+          "id": "bGIuFFGoplKkY5UG",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const lista = $input.all(1); \nconst csvItems = $input.all(0);\n\n// 0 = input principal (CSV)\n// 1 = segundo input (Lista Colaboradores)\n\nconst keys = new Set(\n  lista.map(i => String(i.json.Key).trim())\n);\n\nreturn csvItems.map(item => {\n  const k = String(item.json.Key).trim();\n  return {\n    json: {\n      ...item.json,\n      colaborador_ok: keys.has(k),\n    },\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        576
+      ],
+      "id": "6689b7d3-5cf8-466e-9f43-2a2ea5defb7e",
+      "name": "Valida Keys",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "757a96da-89bc-4428-b278-8dba4b41aa9c",
+              "leftValue": "={{$json.colaborador_ok}}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        976,
+        576
+      ],
+      "id": "d9d32e10-8617-4c90-bc42-3401305d3662",
+      "name": "Se a Key existe"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c9db5375-51e0-41af-ad04-3bac88faa30f",
+              "leftValue": "={{$json[\"row_number\"]}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1424,
+        384
+      ],
+      "id": "2ec5a3e3-9c1f-4d88-a7b2-d4f103c8c5b7",
+      "name": "Se o periodo já existe"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erro: Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Lista Colaboradores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valida colaborador": {
+      "main": [
+        [],
+        []
+      ]
+    },
+    "Verifica o período": {
+      "main": [
+        [
+          {
+            "node": "Se o periodo já existe",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erro: Se verifica o período",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualiza Ticket": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erro: Atualiza ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cria Nova Linha": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erro: Cria nova linha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lista Colaboradores": {
+      "main": [
+        [
+          {
+            "node": "Valida Keys",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valida Keys": {
+      "main": [
+        [
+          {
+            "node": "Se a Key existe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Se a Key existe": {
+      "main": [
+        [
+          {
+            "node": "Verifica o período",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erro: Valida colaborador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Se o periodo já existe": {
+      "main": [
+        [
+          {
+            "node": "Atualiza Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cria Nova Linha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8ee45699-5bb1-4b8b-aeab-b13a7e192beb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ee5b2503fa39f07769f098b1fcdcf81ce32789300648036f340e8c0c167ab279"
+  },
+  "id": "diVS63G6fFpcahVx",
+  "tags": []
+}

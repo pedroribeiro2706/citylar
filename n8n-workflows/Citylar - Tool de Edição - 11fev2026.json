@@ -1,0 +1,317 @@
+{
+  "name": "Citylar - Tool de Edição",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "483e7bb8-0a80-4376-9291-dd5f3f4c0522",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "lookup",
+        "documentId": {
+          "__rl": true,
+          "value": "1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8",
+          "mode": "id"
+        }
+      },
+      "id": "5727a911-3e5b-4776-af6f-4e129e5eb2d4",
+      "name": "Busca Matrícula",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        80,
+        -112
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "bGIuFFGoplKkY5UG",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "lookup",
+        "documentId": {
+          "__rl": true,
+          "value": "1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8",
+          "mode": "id"
+        }
+      },
+      "id": "e9f6d470-70ac-43de-aed1-a231ce286c16",
+      "name": "Verifica Existente",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        304,
+        -112
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "bGIuFFGoplKkY5UG",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeFilter": "string"
+          },
+          "conditions": [
+            {
+              "id": "673f5544-245f-4f81-8153-f761d18f504e",
+              "leftValue": "={{ $json[\"row_number\"] }}",
+              "operator": "isNotEmpty",
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "8eb0eb5a-93f1-47a8-9465-07b235bb0ef4",
+      "name": "Existe Linha?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        528,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "iaresultado"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Ticket Médio": "={{ $node[\"Execute Workflow Trigger\"].json[\"valor_ticket\"] }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "298e0b00-a9ce-4cd0-bb35-d6b2f80bce3d",
+      "name": "Atualiza Ticket",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        752,
+        -208
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "bGIuFFGoplKkY5UG",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "iaresultado"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Nome": "={{ $node[\"Busca Matrícula\"].json[\"Nome\"] }}",
+            "Ticket Médio": "={{ $node[\"Execute Workflow Trigger\"].json[\"valor_ticket\"] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Key",
+              "displayName": "Key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nome",
+              "displayName": "Nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ticket Médio",
+              "displayName": "Ticket Médio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "a03266c0-e4b6-4e45-ab92-1f23a6e724fb",
+      "name": "Cria Nova Linha",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        752,
+        -16
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "bGIuFFGoplKkY5UG",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"output\": \"{{ $json[\"Nome\"] }} atualizado com sucesso para R$ {{ $json[\"Ticket Médio\"] }} ({{ $json[\"Mês\"] }}/{{ $json[\"Ano\"] }})\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        976,
+        -112
+      ],
+      "id": "ab29ab0b-11ea-4371-a0ac-63a17526b03b",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Busca Matrícula",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Busca Matrícula": {
+      "main": [
+        [
+          {
+            "node": "Verifica Existente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verifica Existente": {
+      "main": [
+        [
+          {
+            "node": "Existe Linha?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Existe Linha?": {
+      "main": [
+        [
+          {
+            "node": "Atualiza Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cria Nova Linha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualiza Ticket": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cria Nova Linha": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "13e4072d-269d-4ae0-ada2-0fdf7cea85b4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ee5b2503fa39f07769f098b1fcdcf81ce32789300648036f340e8c0c167ab279"
+  },
+  "id": "diVS63G6fFpcahVx",
+  "tags": []
+}

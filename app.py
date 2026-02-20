@@ -150,6 +150,21 @@ with st.sidebar:
     # TOGGLE (De volta ao topo da área de IA)
     voz_ativa = st.toggle("Modo Voz", value=True)
 
+    # TOGGLE
+    uploaded_file = st.file_uploader("Upload planilha", type=["xlsx","csv"])
+
+    if uploaded_file:
+        files = {
+            "file": (
+                uploaded_file.name,
+                uploaded_file.getvalue(),
+                uploaded_file.type
+            )
+        }
+
+        res = requests.post("https://workflows-mvp.clockdesign.com.br/webhook/citylar/upload", files=files)
+        st.write(res.text)
+
 # 4. LÓGICA DE PROCESSAMENTO (VERSÃO ESTÁVEL)
 
 user_input = None

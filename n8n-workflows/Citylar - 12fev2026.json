@@ -1,0 +1,529 @@
+{
+  "name": "Citylar",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -48,
+        -64
+      ],
+      "id": "35fd8f73-6f79-4961-8d3b-78e2056a30c4",
+      "name": "Webhook",
+      "webhookId": "1a50f888-f994-45c4-bedb-de7d95a4db42"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"output\": $json.output, \"audio\": $json.audio } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2112,
+        -64
+      ],
+      "id": "ec4fab76-248f-4a26-a2cc-1eeb08e84e09",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text || $json.pergunta || \"Olá, pode me ajudar?\" }}",
+        "options": {
+          "systemMessage": "Você é o Assistente de Performance Citylar. Sua função é consultar dados de vendas e realizar cálculos de performance.\n\n### FERRAMENTAS DISPONÍVEIS:\n1. Google Sheets Tool: Use para buscar os valores brutos de Ticket Médio, nomes e matrículas na planilha 'iaresultado'.\n2. Calculator Tool: Use obrigatoriamente para qualquer cálculo matemático, como somar tickets de diferentes dias, calcular médias semanais ou comparar percentuais entre vendedores.\n\n### DIRETRIZES:\n- Se o usuário pedir o ticket de alguém, use o Google Sheets.\n- Se o usuário pedir para somar ou comparar valores, primeiro use o Google Sheets para pegar os números e depois a Calculadora para processar o resultado.\n- Nunca invente números. Se não encontrar o colaborador, peça a matrícula (Key).\n- Formate valores monetários como R$ [valor].\n\n### LÓGICA TEMPORAL E DE REGISTROS:\n- Cada colaborador possui um único registro por mês. Se você encontrar várias linhas para o mesmo nome, elas representam meses diferentes.\n- Sempre considere a 'Data' para identificar a qual mês o valor se refere.\n- Se o usuário perguntar apenas \"Qual o ticket de Fulano?\", responda com o valor do mês mais recente encontrado na planilha e informe a qual mês aquele dado pertence.\n- O administrador atualiza os dados diariamente, então o valor presente na planilha para um determinado mês é sempre a versão final e mais atual daquele período.\n- Seja direto: nunca use frases redundantes como 'mês mais recente de [Mês]'. Apenas cite o mês e o ano (ex: janeiro de 2026)."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        976,
+        -64
+      ],
+      "id": "d687b41b-d271-4e07-a782-9fba107845c4",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Utilize esta ferramenta para consultar o desempenho de vendas (Ticket Médio) dos colaboradores da Citylar ao longo do período. A planilha contém as colunas: Key (matrícula do funcionário), Data, Nome (do colaborador) e Ticket Médio. Use-a sempre que o usuário perguntar sobre números de venda ou informações de funcionários.",
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8",
+          "mode": "list",
+          "cachedResultName": "Resultado",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 223811818,
+          "mode": "list",
+          "cachedResultName": "iaresultado",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8/edit#gid=223811818"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1104,
+        176
+      ],
+      "id": "45a43c79-3c5b-4c2f-b688-16fe8036857d",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleApi": {
+          "id": "bGIuFFGoplKkY5UG",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        176
+      ],
+      "id": "070d4042-5516-42b2-8420-5a3aef21c13e",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "path": "dados-dashboard",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -48,
+        -384
+      ],
+      "id": "f61b726c-f7cd-42c0-b0b0-66c5c27c87fb",
+      "name": "Webhook1",
+      "webhookId": "eeda8820-e2b5-4cba-9139-4592f85be756"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8",
+          "mode": "list",
+          "cachedResultName": "Resultado",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 223811818,
+          "mode": "list",
+          "cachedResultName": "iaresultado",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8/edit#gid=223811818"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        176,
+        -384
+      ],
+      "id": "234732b1-9a3e-4ba4-a97b-a278fb6a7432",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "bGIuFFGoplKkY5UG",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        400,
+        -384
+      ],
+      "id": "7b081742-ac63-4193-80bf-6b3e3ad69718",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        848,
+        176
+      ],
+      "id": "6e8b7c6e-33b1-4d82-8562-1ef0cf07c2ee",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "vHbTOBEsMf4BlYYJ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/text-to-speech/hJ9GqKe88yKfwmmKvV8v",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"text\": {{ JSON.stringify($json.texto_para_audio) }},\n  \"model_id\": \"eleven_multilingual_v2\",\n  \"voice_settings\": {\n    \"stability\": 0.6,\n    \"similarity_boost\": 0.6,\n    \"style\": 0.0,\n    \"use_speaker_boost\": true\n  }\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1664,
+        -64
+      ],
+      "id": "ec555dd3-9fb0-46b4-9cf9-f8c292c11bf7",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "M8HJqsCvuJnIVAFB",
+          "name": "Eleven Labs"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// 1. Capturamos o áudio vindo do HTTP Request (ElevenLabs)\n// O n8n coloca o áudio no campo 'data' por padrão após o HTTP Request\nconst binaryData = await this.helpers.getBinaryDataBuffer(0, 'data');\n\n// 2. Convertemos para a string Base64 que o Python entende\nconst base64Audio = binaryData.toString('base64');\n\n// 3. Pegamos o texto BONITO (com R$) do nó de limpeza\n// Se o seu nó de limpeza se chamar 'Code de Limpeza', use exatamente esse nome\nconst textoParaChat = $(\"Code de Limpeza\").item.json.texto_original;\n\nreturn {\n  audio: base64Audio,\n  output: textoParaChat // Usamos 'output' para o Python não se perder\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1888,
+        -64
+      ],
+      "id": "33a751a7-22da-48fc-9116-ca143d383671",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "binaryPropertyName": "audio",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        624,
+        -128
+      ],
+      "id": "a1bbc4b3-c3c3-4892-94f5-f17b7ba8f5a0",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "vHbTOBEsMf4BlYYJ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fb7bd9e2-9146-406a-85fe-8de52d81bca0",
+              "leftValue": "={{ !!$binary.audio }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        400,
+        -64
+      ],
+      "id": "847a0498-2077-4dd6-941b-d62e61f07bb1",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Captura o texto e remove redundâncias de \"mês mais recente\"\nlet original = $json.output;\nlet voz = original.replace(/mês mais recente de /gi, \"\"); \n\n// 2. Limpeza de quebras de linha para a voz não \"tropeçar\"\nvoz = voz.replace(/\\n/g, ' . ');\n// Troca 'Key' por 'qui' e 'Ticket' por 'tíquete' para a Alessandra não se perder\nvoz = voz.replace(/\\(Key\\)/gi, 'qui');\nvoz = voz.replace(/ticket/gi, 'tíquete');\n\n// 3. Corrige Moeda (R$ 145,75 -> 145 reais e 75 centavos)\nvoz = voz.replace(/R\\$\\s?([\\d\\.]+),(\\d{2})/g, (match, p1, p2) => {\n    const limpo = p1.replace(/\\./g, '');\n    return `${limpo} reais e ${p2} centavos`;\n});\n\n// 4. Corrige Datas (30/01/2026 -> 30 de janeiro de 2026)\nconst meses = {\n    \"01\": \"janeiro\", \"02\": \"fevereiro\", \"03\": \"março\", \"04\": \"abril\",\n    \"05\": \"maio\", \"06\": \"junho\", \"07\": \"julho\", \"08\": \"agosto\",\n    \"09\": \"setembro\", \"10\": \"outubro\", \"11\": \"novembro\", \"12\": \"dezembro\"\n};\n\nvoz = voz.replace(/(\\d{2})\\/(\\d{2})\\/(\\d{4})/g, (match, d, m, a) => {\n    return `${d} de ${meses[m] || m} de ${a}`;\n});\n\nreturn {\n    texto_original: original,\n    texto_para_audio: voz\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        -64
+      ],
+      "id": "11996159-7729-4af4-9621-8a958b639bab",
+      "name": "Code de Limpeza"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.sessionId || $('Edit Fields').item.json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        976,
+        176
+      ],
+      "id": "c4638fd9-3eb2-4210-a1b7-b4e8e9c4592f",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e567a144-1362-4c69-a000-62b4244ed2e4",
+              "name": "sessionId",
+              "value": "={{ $json.body?.sessionId || $json.sessionId || \"fixo\" }}",
+              "type": "string"
+            },
+            {
+              "id": "715195d9-9aad-4b4b-a2ea-ccd921997179",
+              "name": "pergunta",
+              "value": "={{ $json.body?.chatInput || $json.chatInput || $json.text || \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        176,
+        -64
+      ],
+      "id": "86ceb14a-8630-4ef2-8a30-9e30ecc5b119",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code de Limpeza",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code de Limpeza": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "02ed07ec-8270-4c49-9629-1253a9fb44bf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ee5b2503fa39f07769f098b1fcdcf81ce32789300648036f340e8c0c167ab279"
+  },
+  "id": "k1r1bmd75TxGwPAC",
+  "tags": []
+}
