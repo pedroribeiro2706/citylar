@@ -1,0 +1,593 @@
+{
+  "name": "Citylar Editar Ticket",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "trig-edit-1",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 496278067,
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "gs-colab-1",
+      "name": "Lê Colaboradores",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        240,
+        240
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "googleApi": {
+          "id": "bGIuFFGoplKkY5UG",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get input parameters from the workflow trigger\nconst params = $('Execute Workflow Trigger').first().json;\nconst nomeBuscado = String(params.Nome || '').trim().toLowerCase();\nconst keyFornecida = params.Key ? String(params.Key).trim() : null;\nconst data = params.Data || '';\nconst ticketMedio = params['Ticket Médio'] ?? params['Ticket Medio'] ?? params['Ticket_Medio'] ?? 0;\n\n// items here are all Colaborador rows (from Lê Colaboradores)\nlet colaborador = null;\n\n// If Key was provided, search by Key first\nif (keyFornecida) {\n  colaborador = items.find(i => String(i.json.Key || '').trim() === keyFornecida);\n}\n\n// Fall back to name search\nif (!colaborador && nomeBuscado) {\n  colaborador = items.find(i =>\n    String(i.json.Nome || '').trim().toLowerCase() === nomeBuscado\n  );\n}\n\nconst encontrado = !!colaborador;\n\nreturn [{\n  json: {\n    Nome: params.Nome,\n    Key: encontrado ? String(colaborador.json.Key).trim() : null,\n    NomeReal: encontrado ? colaborador.json.Nome : params.Nome,\n    Data: data,\n    'Ticket Médio': ticketMedio,\n    encontrado\n  }\n}];"
+      },
+      "id": "code-resolve-1",
+      "name": "Resolve Colaborador",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-colab-1",
+              "leftValue": "={{$json.encontrado}}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-colab-1",
+      "name": "IF - Colaborador Encontrado",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        720,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "status",
+              "value": "nao_cadastrado",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "mensagem",
+              "value": "={{ 'Colaborador \\'' + $json.NomeReal + '\\' não está cadastrado. Pergunte ao usuário se deseja cadastrá-lo. Se sim, solicite a matrícula do colaborador.' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-naocad-1",
+      "name": "Nao Cadastrado",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        960,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const parts = $json.Data.split('/');\nif (parts.length < 3) {\n  throw new Error('Formato de Data inválido. Use DD/MM/YYYY.');\n}\nconst periodo = parts[2] + '-' + parts[1]; // YYYY-MM\n\nreturn [{\n  json: {\n    ...$json,\n    Periodo: periodo\n  }\n}];"
+      },
+      "id": "code-periodo-1",
+      "name": "Computa Periodo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 223811818,
+          "mode": "id"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Key",
+              "lookupValue": "={{$json.Key}}"
+            },
+            {
+              "lookupColumn": "Periodo",
+              "lookupValue": "={{$json.Periodo}}"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "id": "gs-lookup-1",
+      "name": "Verifica Periodo",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1200,
+        80
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleApi": {
+          "id": "bGIuFFGoplKkY5UG",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// $json comes from Google Sheets lookup — may be empty if no record found\nconst row_number = $json.row_number || null;\n\n// Get the resolved data from Computa Periodo node\nconst resolved = $('Computa Periodo').first().json;\n\nreturn [{\n  json: {\n    Key: resolved.Key,\n    Nome: resolved.NomeReal,\n    Data: resolved.Data,\n    'Ticket Médio': resolved['Ticket Médio'],\n    Periodo: resolved.Periodo,\n    row_number\n  }\n}];"
+      },
+      "id": "code-merge-1",
+      "name": "Mescla Dados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-periodo-1",
+              "leftValue": "={{ $json.row_number !== null && $json.row_number !== undefined }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-periodo-1",
+      "name": "IF - Periodo Existe",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1680,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 223811818,
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Data": "={{$json.Data}}",
+            "Periodo": "={{$json.Periodo}}",
+            "Ticket Médio": "={{$json['Ticket Médio']}}",
+            "row_number": "={{$json.row_number}}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Key",
+              "displayName": "Key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Periodo",
+              "displayName": "Periodo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nome",
+              "displayName": "Nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Ticket Médio",
+              "displayName": "Ticket Médio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "gs-update-1",
+      "name": "Atualiza Ticket",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1920,
+        -80
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "bGIuFFGoplKkY5UG",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 223811818,
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Key": "={{$json.Key}}",
+            "Nome": "={{$json.Nome}}",
+            "Data": "={{$json.Data}}",
+            "Periodo": "={{$json.Periodo}}",
+            "Ticket Médio": "={{$json['Ticket Médio']}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Key",
+              "displayName": "Key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Periodo",
+              "displayName": "Periodo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nome",
+              "displayName": "Nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ticket Médio",
+              "displayName": "Ticket Médio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "gs-append-1",
+      "name": "Insere Ticket",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1920,
+        240
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "bGIuFFGoplKkY5UG",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $('Mescla Dados').first().json;\nreturn [{\n  json: {\n    status: 'atualizado',\n    mensagem: `Ticket de ${d.Nome} (matrícula ${d.Key}) em ${d.Periodo} atualizado para R$ ${d['Ticket Médio']}.`\n  }\n}];"
+      },
+      "id": "code-ret-upd-1",
+      "name": "Retorna Atualizado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $('Mescla Dados').first().json;\nreturn [{\n  json: {\n    status: 'criado',\n    mensagem: `Novo registro criado para ${d.Nome} (matrícula ${d.Key}) em ${d.Periodo}: R$ ${d['Ticket Médio']}.`\n  }\n}];"
+      },
+      "id": "code-ret-new-1",
+      "name": "Retorna Criado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        240
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Lê Colaboradores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lê Colaboradores": {
+      "main": [
+        [
+          {
+            "node": "Resolve Colaborador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve Colaborador": {
+      "main": [
+        [
+          {
+            "node": "IF - Colaborador Encontrado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Colaborador Encontrado": {
+      "main": [
+        [
+          {
+            "node": "Computa Periodo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Nao Cadastrado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Computa Periodo": {
+      "main": [
+        [
+          {
+            "node": "Verifica Periodo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verifica Periodo": {
+      "main": [
+        [
+          {
+            "node": "Mescla Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mescla Dados": {
+      "main": [
+        [
+          {
+            "node": "IF - Periodo Existe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Periodo Existe": {
+      "main": [
+        [
+          {
+            "node": "Atualiza Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insere Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualiza Ticket": {
+      "main": [
+        [
+          {
+            "node": "Retorna Atualizado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insere Ticket": {
+      "main": [
+        [
+          {
+            "node": "Retorna Criado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "b6065896-8759-423e-85b1-0d2581b512c0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ee5b2503fa39f07769f098b1fcdcf81ce32789300648036f340e8c0c167ab279"
+  },
+  "id": "VrP7oTrqdcqoRRIgSFsKA",
+  "tags": []
+}

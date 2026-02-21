@@ -1,0 +1,707 @@
+{
+  "name": "Citylar",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        272,
+        928
+      ],
+      "id": "fe6cfa53-9a20-4b3b-b34c-dad41ad5cd7b",
+      "name": "Webhook",
+      "webhookId": "1a50f888-f994-45c4-bedb-de7d95a4db42"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"output\": $json.output, \"audio\": $json.audio } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2912,
+        928
+      ],
+      "id": "5b1761c5-32e2-4357-afca-09e16d4a6e66",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text || $json.pergunta || \"Olá, pode me ajudar?\" }}",
+        "options": {
+          "systemMessage": "Você é o Assistente de Performance Citylar. Sua função é consultar dados de vendas, realizar cálculos de performance e editar a planilha quando solicitado.\n\n### FERRAMENTAS DISPONÍVEIS:\n1. Google Sheets Tool: Use para buscar os valores brutos de Ticket Médio, nomes e matrículas na planilha 'iaresultado'.\n2. Calculator Tool: Use obrigatoriamente para qualquer cálculo matemático, como somar tickets de diferentes dias, calcular médias semanais ou comparar percentuais entre vendedores.\n3. Editar Ticket Medio: Use para atualizar ou criar o Ticket Médio de um colaborador. Forneça Nome, Data (DD/MM/YYYY, último dia do mês, ex: 28/02/2026) e valor do Ticket Médio. Key (matrícula) é opcional.\n4. Cadastrar Colaborador: Use APENAS quando o usuário confirmar o cadastro de um novo colaborador, após a ferramenta Editar Ticket Medio retornar status 'nao_cadastrado'. Requer Key (matrícula) e Nome.\n\n### DIRETRIZES DE CONSULTA:\n- Se o usuário pedir o ticket de alguém, use o Google Sheets.\n- Se o usuário pedir para somar ou comparar valores, primeiro use o Google Sheets para pegar os números e depois a Calculadora para processar o resultado.\n- Nunca invente números. Se não encontrar o colaborador, peça a matrícula (Key).\n- Formate valores monetários como R$ [valor].\n\n### DIRETRIZES DE EDIÇÃO:\n- Quando o usuário pedir para atualizar ou registrar um Ticket Médio, use a ferramenta Editar Ticket Medio.\n- A Data deve ser sempre o último dia do mês de referência (ex: 31/01/2026, 28/02/2026).\n- Se a ferramenta retornar status 'nao_cadastrado', informe ao usuário e pergunte se deseja cadastrar o colaborador. Se sim, peça a matrícula (Key) e use Cadastrar Colaborador.\n- Após cadastrar, tente novamente o Editar Ticket Medio com os dados originais.\n- Sempre confirme com o usuário antes de fazer alterações.\n\n### LÓGICA TEMPORAL E DE REGISTROS:\n- Cada colaborador possui um único registro por mês. Se você encontrar várias linhas para o mesmo nome, elas representam meses diferentes.\n- Sempre considere a 'Data' para identificar a qual mês o valor se refere.\n- Se o usuário perguntar apenas \"Qual o ticket de Fulano?\", responda com o valor do mês mais recente encontrado na planilha e informe a qual mês aquele dado pertence.\n- O administrador atualiza os dados diariamente, então o valor presente na planilha para um determinado mês é sempre a versão final e mais atual daquele período.\n- Seja direto: nunca use frases redundantes como 'mês mais recente de [Mês]'. Apenas cite o mês e o ano (ex: janeiro de 2026)."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1424,
+        928
+      ],
+      "id": "f878f907-d31d-432f-b89b-14a9a4d2a6e8",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Utilize esta ferramenta para consultar o desempenho de vendas (Ticket Médio) dos colaboradores da Citylar ao longo do período. A planilha contém as colunas: Key (matrícula do funcionário), Data, Nome (do colaborador) e Ticket Médio. Use-a sempre que o usuário perguntar sobre números de venda ou informações de funcionários.",
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8",
+          "mode": "list",
+          "cachedResultName": "Resultado",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 223811818,
+          "mode": "list",
+          "cachedResultName": "iaresultado",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8/edit#gid=223811818"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1680,
+        1152
+      ],
+      "id": "34d0c907-8f00-490e-b54e-e638a3b15e0a",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleApi": {
+          "id": "bGIuFFGoplKkY5UG",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        1808,
+        1152
+      ],
+      "id": "9da30bd7-301e-4a38-a0e0-0363e6279bde",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "path": "dados-dashboard",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        272,
+        592
+      ],
+      "id": "03b5f63b-261b-4a30-8962-b81746bb4ed9",
+      "name": "Webhook1",
+      "webhookId": "eeda8820-e2b5-4cba-9139-4592f85be756"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8",
+          "mode": "list",
+          "cachedResultName": "Resultado",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 223811818,
+          "mode": "list",
+          "cachedResultName": "iaresultado",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8/edit#gid=223811818"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        496,
+        592
+      ],
+      "id": "192b34cb-e4e6-4955-b243-ed0575d43934",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "bGIuFFGoplKkY5UG",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        720,
+        592
+      ],
+      "id": "1553bcc9-0632-4c60-8578-24867f397146",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1424,
+        1152
+      ],
+      "id": "629a1979-93c6-46c5-95bf-8fe82ba2c833",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "vHbTOBEsMf4BlYYJ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/text-to-speech/hJ9GqKe88yKfwmmKvV8v",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"text\": {{ JSON.stringify($json.texto_para_audio) }},\n  \"model_id\": \"eleven_multilingual_v2\",\n  \"voice_settings\": {\n    \"stability\": 0.6,\n    \"similarity_boost\": 0.6,\n    \"style\": 0.0,\n    \"use_speaker_boost\": true\n  }\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2240,
+        928
+      ],
+      "id": "801df0a9-7789-4df8-9435-ae634cc32c6e",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "M8HJqsCvuJnIVAFB",
+          "name": "Eleven Labs"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "binaryPropertyName": "audio",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        944,
+        848
+      ],
+      "id": "434ead9c-3e0a-4915-b416-58878eab93b6",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "vHbTOBEsMf4BlYYJ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "fb7bd9e2-9146-406a-85fe-8de52d81bca0",
+              "leftValue": "={{ !!$binary.audio }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        720,
+        928
+      ],
+      "id": "68723fc0-843d-4c53-b3d7-21e6c981545c",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Captura o texto e remove redundâncias de \"mês mais recente\"\nlet original = $json.output;\nlet voz = original.replace(/mês mais recente de /gi, \"\"); \n\n// 2. Limpeza de quebras de linha para a voz não \"tropeçar\"\nvoz = voz.replace(/\\n/g, ' . ');\n// Troca 'Key' por 'qui' e 'Ticket' por 'tíquete' para a Alessandra não se perder\nvoz = voz.replace(/\\(Key\\)/gi, 'qui');\nvoz = voz.replace(/ticket/gi, 'tíquete');\n\n// 3. Corrige Moeda (R$ 145,75 -> 145 reais e 75 centavos)\nvoz = voz.replace(/R\\$\\s?([\\d\\.]+),(\\d{2})/g, (match, p1, p2) => {\n    const limpo = p1.replace(/\\./g, '');\n    return `${limpo} reais e ${p2} centavos`;\n});\n\n// 4. Corrige Datas (30/01/2026 -> 30 de janeiro de 2026)\nconst meses = {\n    \"01\": \"janeiro\", \"02\": \"fevereiro\", \"03\": \"março\", \"04\": \"abril\",\n    \"05\": \"maio\", \"06\": \"junho\", \"07\": \"julho\", \"08\": \"agosto\",\n    \"09\": \"setembro\", \"10\": \"outubro\", \"11\": \"novembro\", \"12\": \"dezembro\"\n};\n\nvoz = voz.replace(/(\\d{2})\\/(\\d{2})\\/(\\d{4})/g, (match, d, m, a) => {\n    return `${d} de ${meses[m] || m} de ${a}`;\n});\n\nreturn {\n    texto_original: original,\n    texto_para_audio: voz\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2016,
+        928
+      ],
+      "id": "a5a349bf-a297-462e-8ba6-43a2e09f3c31",
+      "name": "Code de Limpeza"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields').first().json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1552,
+        1152
+      ],
+      "id": "5fae9bc7-3e9a-483d-8501-70bc1174ecf4",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e567a144-1362-4c69-a000-62b4244ed2e4",
+              "name": "sessionId",
+              "value": "={{ $json.body?.sessionId || $json.sessionId || \"fixo\" }}",
+              "type": "string"
+            },
+            {
+              "id": "715195d9-9aad-4b4b-a2ea-ccd921997179",
+              "name": "pergunta",
+              "value": "={{ $json.body?.chatInput || $json.chatInput || $json.text || \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        496,
+        928
+      ],
+      "id": "480b9ac2-ae11-4adc-b70a-6068e88bc7d5",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "destinationKey": "audio",
+        "options": {
+          "keepSource": "both"
+        }
+      },
+      "id": "extract-base64-1",
+      "name": "Extract from File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        2464,
+        928
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "out-1",
+              "name": "output",
+              "value": "={{ $json.texto_original }}",
+              "type": "string"
+            },
+            {
+              "id": "aud-1",
+              "name": "audio",
+              "value": "={{ $json.audio }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "edit-fields-audio-1",
+      "name": "Edit Fields2",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2688,
+        928
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Use para atualizar ou criar o Ticket Medio de um colaborador. Forneca Nome, Data no formato DD/MM/YYYY (ultimo dia do mes, ex: 28/02/2026) e valor do Ticket Medio. Key (matricula) e opcional. A ferramenta busca o colaborador pelo nome e retorna o resultado ou informa se nao esta cadastrado.",
+        "workflowId": {
+          "__rl": true,
+          "value": "VrP7oTrqdcqoRRIgSFsKA",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Nome": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Nome', 'Nome do colaborador', 'string') }}",
+            "Data": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Data', 'Data de referencia no formato DD/MM/YYYY ex: 28/02/2026', 'string') }}",
+            "Ticket Medio": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Ticket_Medio', 'Valor numerico do Ticket Medio', 'number') }}",
+            "Key": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Key', 'Matricula do colaborador. Envie string vazia se nao souber', 'string') }}"
+          },
+          "schema": [
+            {
+              "id": "Nome",
+              "displayName": "Nome",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Ticket Medio",
+              "displayName": "Ticket Medio",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Key",
+              "displayName": "Key",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "tool-editar-1",
+      "name": "Editar Ticket Medio",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1184,
+        688
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Use APENAS quando usuario confirmar cadastro de novo colaborador, apos Editar Ticket Medio retornar status nao_cadastrado. Requer Key (matricula do colaborador) e Nome.",
+        "workflowId": {
+          "__rl": true,
+          "value": "LfrroUU5nu9a3gT1",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Key": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Key', 'Matricula do colaborador a ser cadastrado', 'string') }}",
+            "Nome": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Nome', 'Nome completo do colaborador a ser cadastrado', 'string') }}"
+          },
+          "schema": [
+            {
+              "id": "Key",
+              "displayName": "Key",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Nome",
+              "displayName": "Nome",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "tool-cadastrar-1",
+      "name": "Cadastrar Colaborador",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1312,
+        688
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code de Limpeza",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code de Limpeza": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Editar Ticket Medio": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cadastrar Colaborador": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "43e6d804-7821-4b7a-9e20-7ce1cc36fc20",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ee5b2503fa39f07769f098b1fcdcf81ce32789300648036f340e8c0c167ab279"
+  },
+  "id": "k1r1bmd75TxGwPAC",
+  "tags": []
+}

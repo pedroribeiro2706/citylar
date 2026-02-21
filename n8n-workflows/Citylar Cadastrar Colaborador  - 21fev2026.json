@@ -1,0 +1,260 @@
+{
+  "name": "Citylar Cadastrar Colaborador",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "trig-cad-1",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 496278067,
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "gs-colab-cad-1",
+      "name": "Lê Colaboradores",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        240,
+        240
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "googleApi": {
+          "id": "bGIuFFGoplKkY5UG",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get input parameters from the workflow trigger\nconst params = $('Execute Workflow Trigger').first().json;\nconst keyNova = String(params.Key || '').trim();\nconst nomeNovo = String(params.Nome || '').trim();\n\n// items here are all Colaborador rows\nconst existente = items.find(i => String(i.json.Key || '').trim() === keyNova);\nconst keyExiste = !!existente;\n\nreturn [{\n  json: {\n    Key: keyNova,\n    Nome: nomeNovo,\n    keyExiste,\n    nomeExistente: keyExiste ? existente.json.Nome : null\n  }\n}];"
+      },
+      "id": "code-check-cad-1",
+      "name": "Verifica Matricula",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cond-key-cad-1",
+              "leftValue": "={{$json.keyExiste}}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-key-cad-1",
+      "name": "IF - Matricula Existe",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        720,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    status: 'erro',\n    mensagem: `Matrícula ${$json.Key} já está cadastrada para o colaborador '${$json.nomeExistente}'.`\n  }\n}];"
+      },
+      "id": "code-ret-dup-1",
+      "name": "Retorna Matricula Duplicada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1XDDPpuB6XGXww4TJN_YD62BSz-_9_YzurKPWsGcKUc8",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 496278067,
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Key": "={{$json.Key}}",
+            "Nome": "={{$json.Nome}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Key",
+              "displayName": "Key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nome",
+              "displayName": "Nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "gs-append-cad-1",
+      "name": "Cadastra Colaborador",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        960,
+        400
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "bGIuFFGoplKkY5UG",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const params = $('Execute Workflow Trigger').first().json;\nreturn [{\n  json: {\n    status: 'cadastrado',\n    mensagem: `Colaborador '${params.Nome}' (matrícula ${params.Key}) cadastrado com sucesso.`\n  }\n}];"
+      },
+      "id": "code-ret-cad-1",
+      "name": "Retorna Cadastrado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        400
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Lê Colaboradores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lê Colaboradores": {
+      "main": [
+        [
+          {
+            "node": "Verifica Matricula",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verifica Matricula": {
+      "main": [
+        [
+          {
+            "node": "IF - Matricula Existe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Matricula Existe": {
+      "main": [
+        [
+          {
+            "node": "Retorna Matricula Duplicada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cadastra Colaborador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cadastra Colaborador": {
+      "main": [
+        [
+          {
+            "node": "Retorna Cadastrado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "4799453a-89b6-4e04-aea1-ffe939189f16",
+  "meta": {
+    "instanceId": "ee5b2503fa39f07769f098b1fcdcf81ce32789300648036f340e8c0c167ab279"
+  },
+  "id": "LfrroUU5nu9a3gT1",
+  "tags": []
+}

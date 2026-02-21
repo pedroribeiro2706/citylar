@@ -4,13 +4,11 @@ __pycache__/
 *.pyc
 .vscode/
 .DS_Store
-appbkp-10fev2026.py
-appbkp-11fev2026.py
-appbkp-11fev2026-b.py
-appbkp-11fev2026-c.py
+.bkp/
 script.js
 style.css
 index.html
 n8n-projects-470519-54d2ee4b5f95.json
 .claude/
 binary-data.csv
+.mcp.json
