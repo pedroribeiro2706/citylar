@@ -86,6 +86,10 @@ st.markdown("""
     .block-container { padding-top: 1.5rem; }
     .stAudio { display: none; }
 
+    header[data-testid="stHeader"] {
+        display: none !important;
+    }
+
     [data-testid="stChatMessageAvatarUser"] {
     background: linear-gradient(135deg, #800020, #660019);
     color: white !important;
