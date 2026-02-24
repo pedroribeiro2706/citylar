@@ -5,6 +5,7 @@ import plotly.express as px
 import base64
 from streamlit_mic_recorder import mic_recorder
 import uuid
+from datetime import datetime
 
 # --- CONFIGURAÇÃO DE SESSÃO E ESTADO ---
 if "session_id" not in st.session_state:
@@ -63,7 +64,14 @@ st.markdown("""
     }
     .nav-btn:hover {
         background-color: #1e282c; color: #ffffff !important;
-        border-left: 3px solid transparent; text-decoration: none !important;
+        border-left: 3px solid #800020; text-decoration: none !important;
+    }
+    .nav-btn.active {
+        background-color: #1e282c; color: #ffffff !important;
+        border-left: 3px solid #800020;
+    }
+    .nav-btn.disabled {
+        opacity: 0.4; pointer-events: none; cursor: default;
     }
     .nav-icon { margin-right: 10px; width: 20px; text-align: center; display: inline-block; }
     
@@ -139,7 +147,10 @@ BASE_URL = "https://workflows-mvp.clockdesign.com.br/webhook"
 URL_DADOS = f"{BASE_URL}/dados-dashboard"
 URL_CHAT = f"{BASE_URL}/chat"
 
-# 3. SIDEBAR
+# 3. PÁGINA ATUAL (via query param)
+current_page = st.query_params.get("page", "pontuacao")
+
+# 4. SIDEBAR
 with open("logo-citylar.png", "rb") as _f:
     _LOGO_B64 = base64.b64encode(_f.read()).decode()
 
@@ -152,11 +163,11 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     
     # MENU
-    st.markdown("""
-        <a class="nav-btn" href="#"><i class="nav-icon fa-solid fa-chart-line"></i> Dashboard</a>
-        <a class="nav-btn" href="#"><i class="nav-icon fa-solid fa-chart-pie"></i> Análise de Vendas</a>
-        <a class="nav-btn" href="#"><i class="nav-icon fa-solid fa-gear"></i> Configurações</a>
-        <a class="nav-btn" href="#"><i class="nav-icon fa-solid fa-file-lines"></i> Relatórios</a>
+    st.markdown(f"""
+        <a class="nav-btn {'active' if current_page == 'pontuacao' else ''}" href="?page=pontuacao"><i class="nav-icon fa-solid fa-trophy"></i> Pontuação</a>
+        <a class="nav-btn {'active' if current_page == 'dashboard' else ''}" href="?page=dashboard"><i class="nav-icon fa-solid fa-chart-line"></i> Dashboard</a>
+        <a class="nav-btn disabled" href="#"><i class="nav-icon fa-solid fa-file-lines"></i> Relatórios</a>
+        <a class="nav-btn disabled" href="#"><i class="nav-icon fa-solid fa-gear"></i> Configurações</a>
     """, unsafe_allow_html=True)
     
     # DIVISÓRIA
@@ -334,8 +345,6 @@ if df_raw is not None:
         </div>
     """, unsafe_allow_html=True)
 
-    from datetime import datetime
-
     def periodo_para_texto(periodo: pd.Period) -> str:
         meses = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"]
         return f"{meses[periodo.month - 1]} de {periodo.year}"
@@ -344,60 +353,60 @@ if df_raw is not None:
     periodo_default = periodo_atual if periodo_atual in periodos_disponiveis else periodos_disponiveis[0]
 
     @st.fragment
-    def renderizar_visualizacoes(df):
+    def renderizar_pontuacao(df):
         periodo_selecionado = st.selectbox(
             "Mês",
             periodos_disponiveis,
             index=periodos_disponiveis.index(periodo_default),
             key="periodo_resultado"
         )
-
         st.subheader(f"Resultado {periodo_para_texto(periodo_selecionado)}")
-        
-        df_atual = df[df['Periodo'] == periodo_selecionado ].copy()
-        periodo_anterior = periodos_disponiveis[1] if len(periodos_disponiveis) > 1 else None
-        
+
         recordes = df.groupby('Nome')['Ticket Médio'].max().rename('Recorde Histórico')
         mes_anterior = periodo_selecionado - 1
         val_ant = df[df['Periodo'] == mes_anterior].set_index('Nome')['Ticket Médio'] if mes_anterior in periodos_disponiveis else pd.Series()
-        
+
+        df_atual = df[df['Periodo'] == periodo_selecionado].copy()
         df_atual = df_atual.merge(recordes, on='Nome', how='left').fillna(0)
         df_atual['Evolução %'] = df_atual.apply(lambda r: ((r['Ticket Médio'] - val_ant.get(r['Nome'], 0)) / val_ant.get(r['Nome'], 1) * 100) if r['Nome'] in val_ant and val_ant.get(r['Nome'], 0) > 0 else 0, axis=1)
-        
+
         df_vis = df_atual[['Nome', 'Ticket Médio', 'Recorde Histórico', 'Evolução %']].copy()
         df_vis['Evolução %'] = df_vis['Evolução %'].apply(formatar_evolucao)
-        
+
+        table_height = len(df_vis) * 36 + 42
         st.dataframe(
-            df_vis.style.map(color_evolucao, subset=['Evolução %']), 
-            use_container_width=True, 
-            hide_index=True, 
-            height=300,
+            df_vis.style.map(color_evolucao, subset=['Evolução %']),
+            use_container_width=True,
+            hide_index=True,
+            height=table_height,
             column_config={
                 "Ticket Médio": st.column_config.NumberColumn(format="R$ %.2f"),
                 "Recorde Histórico": st.column_config.NumberColumn(format="R$ %.2f")
             }
         )
 
-        st.divider()
-        
-        # Gráficos
+    @st.fragment
+    def renderizar_dashboard(df):
         g1, g2, g3 = st.columns(3)
         with g1:
             s_mes = st.selectbox("Ranking do Mês", periodos_disponiveis, key="f_mes")
             df_g1 = df[df['Periodo'] == s_mes].sort_values('Ticket Médio')
             st.plotly_chart(px.bar(df_g1, x='Ticket Médio', y=df_g1['Nome'].apply(truncar_nome), orientation='h', color_discrete_sequence=['#800020']).update_layout(xaxis_title="", yaxis_title="", margin=dict(l=0,r=0,t=0,b=0), height=450), use_container_width=True, config=PLOTLY_CONFIG)
-        
+
         with g2:
             s_ano = st.selectbox("Recordes por Ano", anos_disponiveis, key="f_ano")
             df_a = df if s_ano == "Todos" else df[df['Ano'] == int(s_ano)]
             df_g2 = df_a.groupby('Nome')['Ticket Médio'].max().reset_index().sort_values('Ticket Médio')
             st.plotly_chart(px.bar(df_g2, x='Ticket Médio', y=df_g2['Nome'].apply(truncar_nome), orientation='h', color_discrete_sequence=['#800020']).update_layout(xaxis_title="", yaxis_title="", margin=dict(l=0,r=0,t=0,b=0), height=450), use_container_width=True, config=PLOTLY_CONFIG)
-            
+
         with g3:
             s_col = st.selectbox("Evolução Individual", colaboradores, key="f_col")
             df_c = df[df['Nome'] == s_col].sort_values('Data').tail(12)
             st.plotly_chart(px.bar(df_c, x=df_c['Data'].dt.strftime('%b/%y'), y='Ticket Médio', color_discrete_sequence=['#800020']).update_layout(xaxis_title="", yaxis_title="", margin=dict(l=0,r=0,t=0,b=0), height=450), use_container_width=True, config=PLOTLY_CONFIG)
 
-    renderizar_visualizacoes(df_raw)
+    if current_page == "pontuacao":
+        renderizar_pontuacao(df_raw)
+    elif current_page == "dashboard":
+        renderizar_dashboard(df_raw)
 
     st.markdown('<div style="text-align: center; margin-top: 50px; color: #999; font-size: 12px;">© 2024 Citylar Intelligence • AdminLTE Theme</div>', unsafe_allow_html=True)
