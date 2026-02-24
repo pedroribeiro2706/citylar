@@ -133,14 +133,14 @@ URL_DADOS = f"{BASE_URL}/dados-dashboard"
 URL_CHAT = f"{BASE_URL}/chat"
 
 # 3. SIDEBAR
+with open("logo-citylar.png", "rb") as _f:
+    _LOGO_B64 = base64.b64encode(_f.read()).decode()
+
 with st.sidebar:
     # LOGO
-    st.markdown("""
-        <div style="height: 180px; display: flex; justify-content: center; align-items: center; background-color: #800020; color: white; margin: -1rem -1rem 10px -1rem;">
-            <div style="text-align: center;">
-                <span style="font-weight: bold; font-size: 38px; letter-spacing: 2px; margin-bottom:-16px; display: block;">CITYLAR</span>
-                <span style="font-weight: 300; font-size: 18px; letter-spacing: 4px;">TICKET MÉDIO</span>
-            </div>
+    st.markdown(f"""
+        <div style="height: 180px; margin: -1rem -1rem 10px -1rem; overflow: hidden;">
+            <img src="data:image/png;base64,{_LOGO_B64}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
         </div>
     """, unsafe_allow_html=True)
     
