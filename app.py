@@ -258,7 +258,8 @@ def carregar_dados():
         if response.status_code == 200:
             df = pd.DataFrame(response.json())
             df['Ticket Médio'] = pd.to_numeric(df['Ticket Médio'].replace('[R$,]', '', regex=True), errors='coerce')
-            df['Data'] = pd.to_datetime(df['Data'], format='mixed', dayfirst=True)
+            df['Data'] = pd.to_datetime(df['Data'], format='mixed', dayfirst=True, errors='coerce')
+            df = df.dropna(subset=['Data'])
             return df
     except Exception as e:
         st.error(f"Erro na conexão: {e}")
