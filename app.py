@@ -112,6 +112,13 @@ st.markdown("""
     header { visibility: hidden !important; height: 0 !important; min-height: 0 !important; overflow: visible !important; }
     .block-container > [data-testid="stVerticalBlock"] { gap: 0 !important; }
 
+    /* Fullscreen button nos gráficos: sempre visível (não só no hover) */
+    [data-testid="StyledFullScreenButton"] {
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: flex !important;
+    }
+
     [data-testid="stChatMessageAvatarUser"] {
     background: linear-gradient(135deg, #800020, #660019);
     color: white !important;
@@ -155,6 +162,21 @@ with st.sidebar:
     # DIVISÓRIA
     st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
     
+    # TOGGLE
+    uploaded_file = st.file_uploader("Upload planilha", type=["xlsx","csv"])
+
+    if uploaded_file:
+        files = {
+            "file": (
+                uploaded_file.name,
+                uploaded_file.getvalue(),
+                uploaded_file.type
+            )
+        }
+
+        res = requests.post("https://workflows-mvp.clockdesign.com.br/webhook/citylar/upload", files=files)
+        st.write(res.text)
+
     # --- ÁREA DO AGENTE ---
     st.markdown('<div class="agent-title">Consultoria IA</div>', unsafe_allow_html=True)
     
@@ -176,20 +198,7 @@ with st.sidebar:
     # TOGGLE (De volta ao topo da área de IA)
     voz_ativa = st.toggle("Modo Voz", value=True)
 
-    # TOGGLE
-    uploaded_file = st.file_uploader("Upload planilha", type=["xlsx","csv"])
-
-    if uploaded_file:
-        files = {
-            "file": (
-                uploaded_file.name,
-                uploaded_file.getvalue(),
-                uploaded_file.type
-            )
-        }
-
-        res = requests.post("https://workflows-mvp.clockdesign.com.br/webhook/citylar/upload", files=files)
-        st.write(res.text)
+    
 
 # 4. LÓGICA DE PROCESSAMENTO (VERSÃO ESTÁVEL)
 
@@ -376,19 +385,19 @@ if df_raw is not None:
         with g1:
             s_mes = st.selectbox("Ranking do Mês", periodos_disponiveis, key="f_mes")
             df_g1 = df[df['Periodo'] == s_mes].sort_values('Ticket Médio')
-            st.plotly_chart(px.bar(df_g1, x='Ticket Médio', y=df_g1['Nome'].apply(truncar_nome), orientation='h', color_discrete_sequence=['#800020']).update_layout(xaxis_title="", yaxis_title="", margin=dict(l=0,r=0,t=0,b=0), height=300), use_container_width=True, config=PLOTLY_CONFIG)
+            st.plotly_chart(px.bar(df_g1, x='Ticket Médio', y=df_g1['Nome'].apply(truncar_nome), orientation='h', color_discrete_sequence=['#800020']).update_layout(xaxis_title="", yaxis_title="", margin=dict(l=0,r=0,t=0,b=0), height=450), use_container_width=True, config=PLOTLY_CONFIG)
         
         with g2:
             s_ano = st.selectbox("Recordes por Ano", anos_disponiveis, key="f_ano")
             df_a = df if s_ano == "Todos" else df[df['Ano'] == int(s_ano)]
             df_g2 = df_a.groupby('Nome')['Ticket Médio'].max().reset_index().sort_values('Ticket Médio')
-            st.plotly_chart(px.bar(df_g2, x='Ticket Médio', y=df_g2['Nome'].apply(truncar_nome), orientation='h', color_discrete_sequence=['#800020']).update_layout(xaxis_title="", yaxis_title="", margin=dict(l=0,r=0,t=0,b=0), height=300), use_container_width=True, config=PLOTLY_CONFIG)
+            st.plotly_chart(px.bar(df_g2, x='Ticket Médio', y=df_g2['Nome'].apply(truncar_nome), orientation='h', color_discrete_sequence=['#800020']).update_layout(xaxis_title="", yaxis_title="", margin=dict(l=0,r=0,t=0,b=0), height=450), use_container_width=True, config=PLOTLY_CONFIG)
             
         with g3:
             s_col = st.selectbox("Evolução Individual", colaboradores, key="f_col")
             df_c = df[df['Nome'] == s_col].sort_values('Data').tail(12)
-            st.plotly_chart(px.bar(df_c, x=df_c['Data'].dt.strftime('%b/%y'), y='Ticket Médio', color_discrete_sequence=['#800020']).update_layout(xaxis_title="", yaxis_title="", margin=dict(l=0,r=0,t=0,b=0), height=300), use_container_width=True, config=PLOTLY_CONFIG)
+            st.plotly_chart(px.bar(df_c, x=df_c['Data'].dt.strftime('%b/%y'), y='Ticket Médio', color_discrete_sequence=['#800020']).update_layout(xaxis_title="", yaxis_title="", margin=dict(l=0,r=0,t=0,b=0), height=450), use_container_width=True, config=PLOTLY_CONFIG)
 
     renderizar_visualizacoes(df_raw)
-    
+
     st.markdown('<div style="text-align: center; margin-top: 50px; color: #999; font-size: 12px;">© 2024 Citylar Intelligence • AdminLTE Theme</div>', unsafe_allow_html=True)
