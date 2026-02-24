@@ -79,14 +79,38 @@ st.markdown("""
         display: flex; justify-content: space-between; align-items: center;
     }
     
-    /* Força visibilidade do botão de recolher */
-    [data-testid="stSidebarCollapseButton"] { color: #b8c7ce !important; display: block !important; }
+    /* Sidebar: remove espaço do header mas mantém botão de collapse */
+    [data-testid="stSidebarHeader"] {
+        height: 0 !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+    [data-testid="stSidebarCollapseButton"] {
+        visibility: visible !important;
+        position: fixed !important;
+        top: 10px !important;
+        left: 10px !important;
+        z-index: 9999 !important;
+        color: #b8c7ce !important;
+        display: flex !important;
+    }
     [data-testid="stSidebarCollapseButton"] svg { fill: #b8c7ce !important; }
+    [data-testid="stExpandSidebarButton"] {
+        visibility: visible !important;
+        position: fixed !important;
+        top: 10px !important;
+        left: 10px !important;
+        z-index: 9999 !important;
+        display: flex !important;
+    }
+    [data-testid="stExpandSidebarButton"] svg { fill: #b8c7ce !important; }
     
     .block-container { padding-top: 1.5rem; }
     .stAudio { display: none; }
 
-    header { display: none !important; }
+    header { visibility: hidden !important; height: 0 !important; min-height: 0 !important; overflow: visible !important; }
+    .block-container > [data-testid="stVerticalBlock"] { gap: 0 !important; }
 
     [data-testid="stChatMessageAvatarUser"] {
     background: linear-gradient(135deg, #800020, #660019);
