@@ -58,17 +58,15 @@ st.markdown("""
     .nav-btn {
         display: block; padding: 12px 15px; background-color: transparent;
         color: #b8c7ce !important; text-decoration: none !important;
-        border-left: 3px solid transparent; 
-        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; 
-        transition: all 0.3s ease;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px;
+        transition: all 0.3s ease; margin: 7px 8px; border-radius: 6px;
     }
     .nav-btn:hover {
         background-color: #1e282c; color: #ffffff !important;
-        border-left: 3px solid #800020; text-decoration: none !important;
+        text-decoration: none !important;
     }
     .nav-btn.active {
         background-color: #1e282c; color: #ffffff !important;
-        border-left: 3px solid #800020;
     }
     .nav-btn.disabled {
         opacity: 0.4; pointer-events: none; cursor: default;
@@ -114,7 +112,14 @@ st.markdown("""
     }
     [data-testid="stExpandSidebarButton"] svg { fill: #b8c7ce !important; }
     
-    .block-container { padding-top: 1.5rem; }
+    .block-container { padding-top: 3.5rem; padding-bottom: 50px; }
+
+    .fixed-footer {
+        position: fixed; bottom: 0; left: 0; right: 0; height: 50px;
+        background: #000000; border-top: 2px solid #2c3b41;
+        display: flex; align-items: center; justify-content: right; padding: 0 5.75rem;
+        font-size: 16px; color: #ffffff; z-index: 1000;
+    }
     .stAudio { display: none; }
 
     header { visibility: hidden !important; height: 0 !important; min-height: 0 !important; overflow: visible !important; }
@@ -157,15 +162,15 @@ with open("logo-citylar.png", "rb") as _f:
 with st.sidebar:
     # LOGO
     st.markdown(f"""
-        <div style="height: 180px; margin: -1rem -1rem 10px -1rem; overflow: hidden;">
+        <div style="height: 180px; margin: 15px -1rem 20px -1rem; overflow: hidden;">
             <img src="data:image/png;base64,{_LOGO_B64}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
         </div>
     """, unsafe_allow_html=True)
     
     # MENU
     st.markdown(f"""
-        <a class="nav-btn {'active' if current_page == 'pontuacao' else ''}" href="?page=pontuacao"><i class="nav-icon fa-solid fa-trophy"></i> Pontuação</a>
-        <a class="nav-btn {'active' if current_page == 'dashboard' else ''}" href="?page=dashboard"><i class="nav-icon fa-solid fa-chart-line"></i> Dashboard</a>
+        <a class="nav-btn {'active' if current_page == 'pontuacao' else ''}" href="?page=pontuacao" target="_self"><i class="nav-icon fa-solid fa-trophy"></i> Pontuação</a>
+        <a class="nav-btn {'active' if current_page == 'dashboard' else ''}" href="?page=dashboard" target="_self"><i class="nav-icon fa-solid fa-chart-line"></i> Dashboard</a>
         <a class="nav-btn disabled" href="#"><i class="nav-icon fa-solid fa-file-lines"></i> Relatórios</a>
         <a class="nav-btn disabled" href="#"><i class="nav-icon fa-solid fa-gear"></i> Configurações</a>
     """, unsafe_allow_html=True)
@@ -338,10 +343,15 @@ if df_raw is not None:
     colaboradores = sorted(df_raw['Nome'].unique())
 
     # HEADER PRINCIPAL
-    st.markdown("""
+    _page_titles = {
+        "pontuacao": ("Pontuação", "Ranking e evolução por período"),
+        "dashboard": ("Dashboard", "Visão consolidada de performance"),
+    }
+    _title, _subtitle = _page_titles.get(current_page, ("Citylar", ""))
+    st.markdown(f"""
         <div class="main-header">
-            <h2 style="margin:0; font-weight: 400; color: #fff;">Dashboard Executivo</h2>
-            <div style="font-size: 14px; color: #777;">Visão consolidada de performance</div>
+            <h2 style="margin:0; font-weight: 400; color: #fff;">{_title}</h2>
+            <div style="font-size: 14px; color: #777;">{_subtitle}</div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -409,4 +419,4 @@ if df_raw is not None:
     elif current_page == "dashboard":
         renderizar_dashboard(df_raw)
 
-    st.markdown('<div style="text-align: center; margin-top: 50px; color: #999; font-size: 12px;">© 2024 Citylar Intelligence • AdminLTE Theme</div>', unsafe_allow_html=True)
+    st.markdown('<div class="fixed-footer">© 2026 Jogo do Trabalho Intelligence • Citylar Theme</div>', unsafe_allow_html=True)
