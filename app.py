@@ -79,6 +79,19 @@ st.markdown("""
     }
     
     .sidebar-divider { height: 1px; background-color: #4b646f; margin: 20px 0; opacity: 0.5; }
+
+    .kpi-card {
+        background: #2c3b41; border-radius: 8px; padding: 16px 20px;
+        text-align: center;
+    }
+    .kpi-label { font-size: 1rem; color: #b8c7ce; margin-bottom: 6px; text-align: center; }
+
+    [data-testid="stSelectbox"] label,
+    .chart-title {
+        font-size: 1.5rem !important;
+        color: #b8c7ce !important;
+    }
+    .kpi-value { font-size: 26px; font-weight: bold; color: #ffffff; }
     
     .main-header {
         border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px;
@@ -170,7 +183,7 @@ with st.sidebar:
     # MENU
     st.markdown(f"""
         <a class="nav-btn {'active' if current_page == 'pontuacao' else ''}" href="?page=pontuacao" target="_self"><i class="nav-icon fa-solid fa-trophy"></i> Pontuação</a>
-        <a class="nav-btn {'active' if current_page == 'dashboard' else ''}" href="?page=dashboard" target="_self"><i class="nav-icon fa-solid fa-chart-line"></i> Dashboard</a>
+        <a class="nav-btn {'active' if current_page == 'dashboard' else ''}" href="?page=dashboard" target="_self"><i class="nav-icon fa-solid fa-chart-line"></i> Data Viz</a>
         <a class="nav-btn disabled" href="#"><i class="nav-icon fa-solid fa-file-lines"></i> Relatórios</a>
         <a class="nav-btn disabled" href="#"><i class="nav-icon fa-solid fa-gear"></i> Configurações</a>
     """, unsafe_allow_html=True)
@@ -325,7 +338,7 @@ def truncar_nome(nome):
     return (nome[:18] + '..') if len(nome) > 18 else nome
 
 def color_evolucao(val):
-    color = 'green' if '▲' in val else 'red' if '▼' in val else 'gray'
+    color = '#11e00d' if '▲' in val else 'red' if '▼' in val else 'gray'
     return f'color: {color}; font-weight: bold'
 
 PLOTLY_CONFIG = {'displayModeBar': False}
@@ -345,7 +358,7 @@ if df_raw is not None:
     # HEADER PRINCIPAL
     _page_titles = {
         "pontuacao": ("Pontuação", "Ranking e evolução por período"),
-        "dashboard": ("Dashboard", "Visão consolidada de performance"),
+        "dashboard": ("Storytelling", "Visão consolidada de performance"),
     }
     _title, _subtitle = _page_titles.get(current_page, ("Citylar", ""))
     st.markdown(f"""
@@ -397,7 +410,35 @@ if df_raw is not None:
 
     @st.fragment
     def renderizar_dashboard(df):
-        g1, g2, g3 = st.columns(3)
+        # --- ESPAÇO APÓS HEADER ---
+        st.markdown('<div style="height:20px"></div>', unsafe_allow_html=True)
+
+        # --- KPI CARDS ---
+        periodo_kpi = pd.Period(datetime.now(), freq="M")
+        df_mes_kpi = df[df['Periodo'] == periodo_kpi]
+        media_mes = df_mes_kpi['Ticket Médio'].mean() if not df_mes_kpi.empty else 0
+        ultimos_12 = sorted(df['Periodo'].unique(), reverse=True)[:12]
+        media_12m = df[df['Periodo'].isin(ultimos_12)]['Ticket Médio'].mean()
+        maior_ticket = df['Ticket Médio'].max()
+
+        c1, c2, c3, c4 = st.columns(4)
+        with c1:
+            st.markdown('<div class="kpi-label">Média do Mês Atual</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="kpi-card"><div class="kpi-value">R$ {media_mes:,.2f}</div></div>', unsafe_allow_html=True)
+        with c2:
+            st.markdown('<div class="kpi-label">Média dos últimos 12 Meses</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="kpi-card"><div class="kpi-value">R$ {media_12m:,.2f}</div></div>', unsafe_allow_html=True)
+        with c3:
+            st.markdown('<div class="kpi-label">Maior Ticket Médio</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="kpi-card"><div class="kpi-value">R$ {maior_ticket:,.2f}</div></div>', unsafe_allow_html=True)
+        with c4:
+            st.markdown('<div class="kpi-label">&nbsp;</div>', unsafe_allow_html=True)
+            st.markdown('<div class="kpi-card"><div class="kpi-value">&nbsp;</div></div>', unsafe_allow_html=True)
+
+        st.markdown('<div style="height:40px"></div>', unsafe_allow_html=True)
+
+        # --- LINHA 1 ---
+        g1, g2 = st.columns(2)
         with g1:
             s_mes = st.selectbox("Ranking do Mês", periodos_disponiveis, key="f_mes")
             df_g1 = df[df['Periodo'] == s_mes].sort_values('Ticket Médio')
@@ -409,10 +450,21 @@ if df_raw is not None:
             df_g2 = df_a.groupby('Nome')['Ticket Médio'].max().reset_index().sort_values('Ticket Médio')
             st.plotly_chart(px.bar(df_g2, x='Ticket Médio', y=df_g2['Nome'].apply(truncar_nome), orientation='h', color_discrete_sequence=['#800020']).update_layout(xaxis_title="", yaxis_title="", margin=dict(l=0,r=0,t=0,b=0), height=450), use_container_width=True, config=PLOTLY_CONFIG)
 
+        st.markdown('<div style="height:30px"></div>', unsafe_allow_html=True)
+
+        # --- LINHA 2 ---
+        g3, g4 = st.columns(2)
         with g3:
             s_col = st.selectbox("Evolução Individual", colaboradores, key="f_col")
             df_c = df[df['Nome'] == s_col].sort_values('Data').tail(12)
             st.plotly_chart(px.bar(df_c, x=df_c['Data'].dt.strftime('%b/%y'), y='Ticket Médio', color_discrete_sequence=['#800020']).update_layout(xaxis_title="", yaxis_title="", margin=dict(l=0,r=0,t=0,b=0), height=450), use_container_width=True, config=PLOTLY_CONFIG)
+
+        with g4:
+            st.markdown('<div class="chart-title">Evolução da Média Geral</div>', unsafe_allow_html=True)
+            st.markdown('<div style="height:40px"></div>', unsafe_allow_html=True)
+            df_avg = df.groupby('Periodo')['Ticket Médio'].mean().reset_index().sort_values('Periodo')
+            df_avg['Mes'] = df_avg['Periodo'].dt.strftime('%b/%y')
+            st.plotly_chart(px.bar(df_avg, x='Mes', y='Ticket Médio', color_discrete_sequence=['#800020']).update_layout(xaxis_title="", yaxis_title="", margin=dict(l=0,r=0,t=0,b=0), height=450), use_container_width=True, config=PLOTLY_CONFIG)
 
     if current_page == "pontuacao":
         renderizar_pontuacao(df_raw)
