@@ -420,20 +420,27 @@ if df_raw is not None:
         ultimos_12 = sorted(df['Periodo'].unique(), reverse=True)[:12]
         media_12m = df[df['Periodo'].isin(ultimos_12)]['Ticket Médio'].mean()
         maior_ticket = df['Ticket Médio'].max()
+        mesmo_mes_ano_passado = periodo_kpi - 12
+        df_mesmo_mes_ap = df[df['Periodo'] == mesmo_mes_ano_passado]
+        media_mesmo_mes_ap = df_mesmo_mes_ap['Ticket Médio'].mean() if not df_mesmo_mes_ap.empty else None
 
         c1, c2, c3, c4 = st.columns(4)
+        meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
+        label_ap = f"Média de {meses[mesmo_mes_ano_passado.month - 1]} {mesmo_mes_ano_passado.year}"
+        valor_ap = f'R$ {media_mesmo_mes_ap:,.2f}' if media_mesmo_mes_ap is not None else 'Não há dados'
+
         with c1:
             st.markdown('<div class="kpi-label">Média do Mês Atual</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="kpi-card"><div class="kpi-value">R$ {media_mes:,.2f}</div></div>', unsafe_allow_html=True)
         with c2:
+            st.markdown(f'<div class="kpi-label">{label_ap}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="kpi-card"><div class="kpi-value">{valor_ap}</div></div>', unsafe_allow_html=True)
+        with c3:
             st.markdown('<div class="kpi-label">Média dos últimos 12 Meses</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="kpi-card"><div class="kpi-value">R$ {media_12m:,.2f}</div></div>', unsafe_allow_html=True)
-        with c3:
+        with c4:
             st.markdown('<div class="kpi-label">Maior Ticket Médio</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="kpi-card"><div class="kpi-value">R$ {maior_ticket:,.2f}</div></div>', unsafe_allow_html=True)
-        with c4:
-            st.markdown('<div class="kpi-label">&nbsp;</div>', unsafe_allow_html=True)
-            st.markdown('<div class="kpi-card"><div class="kpi-value">&nbsp;</div></div>', unsafe_allow_html=True)
 
         st.markdown('<div style="height:40px"></div>', unsafe_allow_html=True)
 
