@@ -4,7 +4,7 @@ __pycache__/
 *.pyc
 .vscode/
 .DS_Store
-.bkp/
+bkp/
 script.js
 style.css
 index.html
