@@ -386,12 +386,9 @@ if df_raw is not None:
         st.subheader(f"Resultado {periodo_para_texto(periodo_selecionado)}")
 
         recordes = df.groupby('Nome')['Ticket Médio'].max().rename('Recorde Histórico')
-        mes_anterior = periodo_selecionado - 1
-        val_ant = df[df['Periodo'] == mes_anterior].set_index('Nome')['Ticket Médio'] if mes_anterior in periodos_disponiveis else pd.Series()
-
         df_atual = df[df['Periodo'] == periodo_selecionado].copy()
         df_atual = df_atual.merge(recordes, on='Nome', how='left').fillna(0)
-        df_atual['Evolução %'] = df_atual.apply(lambda r: ((r['Ticket Médio'] - val_ant.get(r['Nome'], 0)) / val_ant.get(r['Nome'], 1) * 100) if r['Nome'] in val_ant and val_ant.get(r['Nome'], 0) > 0 else 0, axis=1)
+        df_atual['Evolução %'] = df_atual.apply(lambda r: ((r['Ticket Médio'] - r['Recorde Histórico']) / r['Recorde Histórico'] * 100) if r['Recorde Histórico'] > 0 else 0, axis=1)
 
         df_vis = df_atual[['Nome', 'Ticket Médio', 'Recorde Histórico', 'Evolução %']].copy()
         df_vis['Evolução %'] = df_vis['Evolução %'].apply(formatar_evolucao)
