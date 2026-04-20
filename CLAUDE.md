@@ -11,6 +11,8 @@ Ao iniciar qualquer sessão neste projeto, siga esta ordem:
 
 Ao finalizar alterações relevantes, atualize `log.md` com o que foi feito na sessão atual, e adicione uma linha na tabela de histórico de `MEMORY.md`.
 
+O projeto usa o comando `/registrar` (skill global do Claude Code) para automatizar esse processo: ele analisa o git log, gera um resumo inteligente da sessão, atualiza os dois arquivos e faz commit + push. Ao final de cada sessão com alterações, sugira ao usuário rodar `/registrar`.
+
 ---
 
 ## Project Overview

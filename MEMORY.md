@@ -105,7 +105,7 @@ streamlit run app_light.py --theme.base=light --theme.primaryColor=#800020 --the
 
 | Data | Descrição |
 |---|---|
-| 2026-04-20 | Correção do cálculo de Recorde Histórico (excluir mês atual) em app.py e app_light.py |
+| 2026-04-20 | Correção do Recorde Histórico + criação do sistema de registro: skill /registrar, Stop hook e arquivos log.md/MEMORY.md |
 | 2026-02-25 | Workflow n8n "Citylar - Tool de Edição" — upload de planilha XLSX/CSV |
 | 2026-02-14 | Versão inicial do workflow n8n |
 | anterior | Criação do app.py (dark mode com IA) e app_light.py (light mode sem IA) |
