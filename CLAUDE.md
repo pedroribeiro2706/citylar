@@ -2,6 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Arquivos de Contexto — Leitura Obrigatória
+
+Ao iniciar qualquer sessão neste projeto, siga esta ordem:
+
+1. **Sempre leia `log.md`** na raiz do projeto — contém as atualizações mais recentes, correções e decisões da última sessão.
+2. **Quando precisar de contexto histórico**, leia `MEMORY.md` na raiz — contém o histórico completo de tudo que foi feito no projeto, arquitetura, problemas resolvidos e decisões de design.
+
+Ao finalizar alterações relevantes, atualize `log.md` com o que foi feito na sessão atual, e adicione uma linha na tabela de histórico de `MEMORY.md`.
+
+---
+
 ## Project Overview
 
 Citylar is an executive sales dashboard with an integrated AI consultant chatbot, built with Streamlit. It tracks employee "Ticket Médio" (average ticket) performance, displaying rankings, historical records, and evolution trends. The AI consultant connects to n8n workflows that query Google Sheets data.
