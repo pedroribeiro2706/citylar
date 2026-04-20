@@ -207,7 +207,7 @@ if df_raw is not None:
         )
         st.subheader(f"Resultado {periodo_para_texto(periodo_selecionado)}")
 
-        recordes = df.groupby('Nome')['Ticket Médio'].max().rename('Recorde Histórico')
+        recordes = df[df['Periodo'] < periodo_selecionado].groupby('Nome')['Ticket Médio'].max().rename('Recorde Histórico')
         df_atual = df[df['Periodo'] == periodo_selecionado].copy()
         df_atual = df_atual.merge(recordes, on='Nome', how='left').fillna(0)
         df_atual['Evolução %'] = df_atual.apply(lambda r: ((r['Ticket Médio'] - r['Recorde Histórico']) / r['Recorde Histórico'] * 100) if r['Recorde Histórico'] > 0 else 0, axis=1)
